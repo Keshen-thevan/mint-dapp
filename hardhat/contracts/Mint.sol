@@ -11,14 +11,14 @@ contract Mint is ERC20{
     event Minted(address indexed _from, uint _value);
 
     modifier onlyOwner(){
-        require(msg.sender == owner, "function access restricted to the owner");
+        require(msg.sender = owner, "function access restricted to the owner");
         _;
     }
     
 
     constructor() ERC20("Woolongs", "W"){
         _mint(msg.sender, 10 * 10**18);
-        owner == payable(msg.sender);
+        owner = payable(msg.sender);
     }
 
     function mint(uint256 _amount)external payable{
