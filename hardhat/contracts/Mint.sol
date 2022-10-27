@@ -11,14 +11,13 @@ contract Mint is ERC20{
     event Minted(address indexed _from, uint _value);
 
     modifier onlyOwner(){
-        require(msg.sender = owner, "function access restricted to the owner");
+        require(msg.sender == owner, "function access restricted to the owner");
         _;
     }
     
-
     constructor() ERC20("Woolongs", "W"){
         _mint(msg.sender, 10 * 10**18);
-        owner = payable(msg.sender);
+        owner == msg.sender;
     }
 
     function mint(uint256 _amount)external payable{
@@ -34,12 +33,12 @@ contract Mint is ERC20{
         require(sent, "Failed to withdraw Ether");
     }
 
-         function withdraw() public onlyOwner {
-        address _owner = owner();
-        uint256 amount = address(this).balance;
-        (bool sent, ) = _owner.call{value: amount}("");
-        require(sent, "Failed to send Ether");
-      }
+    function getBalance() external view returns(uint256){
+        return address(this).balance;
+    }
 
-    
+    receive() external payable{}
+    fallback () external payable{}
 }
+
+//Mint contract address:  0x55E812864624B4e3571C65373E79d6f557Dcf449
