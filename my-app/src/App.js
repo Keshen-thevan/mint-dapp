@@ -1,7 +1,7 @@
 
 import './App.css';
 import Web3Modal from 'web3modal'
-import { providers, Contract, utils } from "ethers"
+import ethers, { providers, Contract, utils } from "ethers"
 import { useRef, useEffect, useState } from "react"
 import {ADDRESS, ABI} from './constants'
 
@@ -10,6 +10,9 @@ function App() {
   const web3ModalRef = useRef();
   const [walletConnected, setWalletConnected]  = useState(false)
   const [userAddress, setUserAddress] = useState('')
+  const [totalSupply, setTotalSupply] = useState('')
+  const [tokensOwned, setTokensOwned] = useState('')
+  const [balance, setBalance] = useState('')
   const tokenPrice = 0.001;
 
   const connectWallet = async() =>{
@@ -47,8 +50,15 @@ function App() {
       })
       
       connectWallet()
+      
     }
-  }, [walletConnected])
+  }, [walletConnected, totalSupply])
+
+  useEffect(() =>{
+    getTotalSupply()
+    getAmountOwned()
+    getBalance()
+  }, [totalSupply])
 
   const getUserAddress = async() => {
     const accounts = await window.ethereum.request({
@@ -70,7 +80,31 @@ function App() {
   }
 
   const getTotalSupply = async() =>{
-    
+    const provider = await getProviderOrSigner();
+    const mintContract = new Contract(ADDRESS, ABI, provider)
+    const tx = await mintContract.totalSupply()
+    const supply = tx / 10 ** 18
+    setTotalSupply(supply.toLocaleString())
+  }
+
+  const getAmountOwned = async() =>{
+    const provider = await getProviderOrSigner()
+    const mintContract = new Contract(ADDRESS, ABI, provider)
+    const tx = await mintContract.balanceOf(userAddress)
+    const owned = tx / 10 ** 18
+    setTokensOwned(owned.toLocaleString())
+  }
+
+  const withdraw = async() =>{
+
+  }
+
+  const getBalance = async() =>{
+    const provider = await getProviderOrSigner()
+    const balance = await provider.getBalance(userAddress)
+    const finalBalance = parseFloat(utils.formatEther(balance)).toFixed(2);
+    setBalance(finalBalance)
+
   }
 
 
@@ -85,7 +119,7 @@ function App() {
         </div>
         <div className="userData">
           <div className="userTitle">Balance:</div>
-          <div>354543434 Eth</div>
+          <div>{balance} Eth</div>
         </div>
 
       </div>
@@ -97,8 +131,8 @@ function App() {
       <div className='priceText'>Current woolong price is only 0.001 Eth</div>
 
       <div>
-        <div>Current total supply: </div>
-        <div>Total Owned coins: </div>
+        <div>Current total supply:{totalSupply} &#xFFE6; </div>
+        <div>Total Owned coins: {tokensOwned} &#xFFE6;</div>
       </div>
       <div className="container">
         <label htmlFor = "amountInput">Amount To Mint:</label>
