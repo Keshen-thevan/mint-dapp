@@ -3,12 +3,14 @@ import './App.css';
 import Web3Modal from 'web3modal'
 import { providers, Contract, utils } from "ethers"
 import { useRef, useEffect, useState } from "react"
+import {ADDRESS, ABI} from './constants'
 
 
 function App() {
   const web3ModalRef = useRef();
   const [walletConnected, setWalletConnected]  = useState(false)
   const [userAddress, setUserAddress] = useState('')
+  const tokenPrice = 0.001;
 
   const connectWallet = async() =>{
     try{
@@ -56,12 +58,27 @@ function App() {
     setUserAddress(account)
   }
 
+  const mint = async() =>{
+    const inputAmount = document.getElementById('amountInput').value
+    console.log(inputAmount)
+    const signer = await getProviderOrSigner(true)
+    const mintContract = new Contract(ADDRESS, ABI, signer);
+    const value = inputAmount * tokenPrice
+    const tx = await mintContract.mint(inputAmount, {value: utils.parseEther(value.toString())});
+    await tx.wait()
+    window.alert("Successfully minted " +{inputAmount}+ " Woolongs")
+  }
+
+  const getTotalSupply = async() =>{
+    
+  }
+
 
   return (
     <div className="App">
       <div className="userInfo">
 
-        <img src='user.png' className="userImg"/>
+        <img src='user.png' className="userImg" alt="userIcon"/>
         <div className='userData'>
           <div className="userTitle">User:</div>
           <div>{userAddress}</div>
@@ -72,12 +89,22 @@ function App() {
         </div>
 
       </div>
-      <div className="heading"> &#xFFE6; Woolongs </div>
-      <div className='description'>woolongs is the standard currency of the solar system. Made popular by the famous anime Cowboy Bebop.
-        If you plan on traveling the galaxy, then go ahead and mint yourself a few woolongs. It is accepted by over
-        90% of merchants in the star system.  
+      <div className="heading"> &#xFFE6;oolong </div>
+      <div className='description'>Woolong is the standard currency of the solar system. Made popular by the famous anime
+        Cowboy Bebop. It is a quick adn efficient way to everyday transactions. If you plan on traveling the galaxy, then go ahead and mint yourself a few woolongs. It is accepted 
+        by over all merchants in the star system. 
       </div>
-      <div>current woolong price is only 0.001 Eth</div>
+      <div className='priceText'>Current woolong price is only 0.001 Eth</div>
+
+      <div>
+        <div>Current total supply: </div>
+        <div>Total Owned coins: </div>
+      </div>
+      <div className="container">
+        <label htmlFor = "amountInput">Amount To Mint:</label>
+        <input type="number" className="amountInput" id="amountInput"/>
+        <button className='btn' onClick={mint}>Mint</button>
+      </div>
     </div>
   );
 }
