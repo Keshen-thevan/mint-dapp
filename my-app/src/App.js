@@ -12,6 +12,8 @@ function App() {
   const [userAddress, setUserAddress] = useState('')
   const [totalSupply, setTotalSupply] = useState('')
   const [tokensOwned, setTokensOwned] = useState('')
+  const [contractBalance, setContractBalance] = useState('')
+  const [owner, setOwner] = useState('')
   const [balance, setBalance] = useState('')
   const tokenPrice = 0.001;
 
@@ -58,7 +60,9 @@ function App() {
     getTotalSupply()
     getAmountOwned()
     getBalance()
-  }, [totalSupply])
+    getOwner()
+    getContractBalance()
+  }, [totalSupply,tokensOwned,contractBalance])
 
   const getUserAddress = async() => {
     const accounts = await window.ethereum.request({
@@ -70,13 +74,13 @@ function App() {
 
   const mint = async() =>{
     const inputAmount = document.getElementById('amountInput').value
-    console.log(inputAmount)
     const signer = await getProviderOrSigner(true)
     const mintContract = new Contract(ADDRESS, ABI, signer);
     const value = inputAmount * tokenPrice
     const tx = await mintContract.mint(inputAmount, {value: utils.parseEther(value.toString())});
     await tx.wait()
-    window.alert("Successfully minted " +{inputAmount}+ " Woolongs")
+    window.alert("Successfully minted " + inputAmount + " Woolongs")
+    document.getElementById('amountInput').value = ''
   }
 
   const getTotalSupply = async() =>{
@@ -96,7 +100,18 @@ function App() {
   }
 
   const withdraw = async() =>{
+    const signer = await getProviderOrSigner(true)
+    const mintContract = new Contract(ADDRESS, ABI, signer);
+    const tx = await mintContract.withdraw();
+    await tx.wait()
+    window.alert('All funds have been withdrawn')
+  }
 
+  const getContractBalance = async() =>{
+    const provider = await getProviderOrSigner()
+    const mintContract = new Contract(ADDRESS, ABI, provider)
+    const tx = await mintContract.getBalance()
+    setContractBalance(utils.formatEther(tx))
   }
 
   const getBalance = async() =>{
@@ -105,6 +120,28 @@ function App() {
     const finalBalance = parseFloat(utils.formatEther(balance)).toFixed(2);
     setBalance(finalBalance)
 
+  }
+
+  const getOwner = async() =>{
+    const provider = await getProviderOrSigner()
+    const mintContract = new Contract(ADDRESS, ABI, provider)
+    const tx = await mintContract.owner()
+    setOwner(tx)
+  }
+
+  const renderBody = ()=> {
+    if(userAddress !== owner.toLowerCase()){
+      return(
+        <div className='description'>Woolong is the standard currency of the solar system. Made popular by the famous anime
+        Cowboy Bebop. It is a quick and efficient way to everyday transactions. If you plan on traveling the galaxy, then go ahead and mint yourself a few woolongs. It is accepted 
+        by over all merchants in the star system. 
+      </div>)
+    }else{
+      return(<div>
+        <div>Contract Balance: {contractBalance} ETH</div>
+        <button className='btn' onClick={withdraw}>Withdraw</button>
+        </div>)
+    }
   }
 
 
@@ -124,14 +161,12 @@ function App() {
 
       </div>
       <div className="heading"> &#xFFE6;oolong </div>
-      <div className='description'>Woolong is the standard currency of the solar system. Made popular by the famous anime
-        Cowboy Bebop. It is a quick adn efficient way to everyday transactions. If you plan on traveling the galaxy, then go ahead and mint yourself a few woolongs. It is accepted 
-        by over all merchants in the star system. 
-      </div>
+      
       <div className='priceText'>Current woolong price is only 0.001 Eth</div>
 
-      <div>
-        <div>Current total supply:{totalSupply} &#xFFE6; </div>
+      {renderBody()}
+      <div className='coinDescription'>
+        <div className='coinInfo'>Current total supply:{totalSupply} &#xFFE6; </div>
         <div>Total Owned coins: {tokensOwned} &#xFFE6;</div>
       </div>
       <div className="container">

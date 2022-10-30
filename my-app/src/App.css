@@ -88,6 +88,15 @@ body{
   font-size: 18px;
 }
 
+.coinDescription{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.coinInfo{
+  padding-right: 30px;
+}
+
 
 
 

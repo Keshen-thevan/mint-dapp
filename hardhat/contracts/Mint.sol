@@ -2,22 +2,16 @@
 pragma solidity ^0.8.12;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Mint is ERC20{
+contract Mint is ERC20, Ownable{
 
     uint256 tokenPrice = 0.001 ether;
-    address payable owner;
     mapping(address => uint256) tokensOwned;
     event Minted(address indexed _from, uint _value);
-
-    modifier onlyOwner(){
-        require(msg.sender == owner, "function access restricted to the owner");
-        _;
-    }
     
     constructor() ERC20("Woolongs", "W"){
         _mint(msg.sender, 10 * 10**18);
-        owner == msg.sender;
     }
 
     function mint(uint256 _amount)external payable{
@@ -29,7 +23,7 @@ contract Mint is ERC20{
 
     function withdraw() external onlyOwner{
         uint256 _amount = address(this).balance;
-        (bool sent,) = owner.call{value: _amount}("");
+        (bool sent,) = owner().call{value: _amount}("");
         require(sent, "Failed to withdraw Ether");
     }
 
@@ -37,8 +31,9 @@ contract Mint is ERC20{
         return address(this).balance;
     }
 
+
     receive() external payable{}
     fallback () external payable{}
 }
 
-//Mint contract address:  0x55E812864624B4e3571C65373E79d6f557Dcf449
+//Mint contract address:   0x8021D12A34EE66d9CaABa105c69377F3310b0867
